@@ -189,4 +189,13 @@ These lines are baked into this repo's own pastes. They come from pre-run 4's wo
 
 Nothing yet. When a fix works, append it here, one block per fix, in the form shown above: UTC time, what failed, what was changed, why that change stays.
 
+
+```
+- 2026-11-11T19:08:27Z.
+- What worked: (c) the preflight read each public node's id and kept two kaspads (local nodes 1 and 5); node 4 answered as the same kaspad as node 1 and got no sender. The bot's pass found every other endpoint to be a kept kaspad or silent, and wrote a legal NO SEND no-free-node. (a) Both repairs (HOLD-3 at 18:42:12Z, RETURN at 19:01:12Z) waited for the stopped senders to go, started both again, and both logged their start. (b) Every file reached origin on the first try; the retry path was only exercised offline.
+- What failed: the restarted payment senders reloaded their coins from the desk node's UTXO index while their own payment chains were still in the mempool. After the HOLD-3 restart one sender saw only rejects at first, turned chaining off, ran out of coins, and exited; the other sent about 413 a minute. In RETURN one sender loaded 1 coin and the other 1,999, so about 29,913 a minute went out against 1,013 a second. HOLD-3, HOLD-4, and RETURN read low for that reason, not only for the offer. Two senders also reached the same ceiling as three in pre-run 4, about 118,000 a minute, which tracks the 2,000-coin payment pile.
+- What was changed: nothing in this repo's run. The runner was not restarted and the pile was not changed. A next repo carries these lines: a payment sender that restarts mid-run must not take its pool from the confirmed UTXO set alone while its chains are in the mempool (it keeps its chain tips, or excludes coins already spent in the mempool and adds their unconfirmed change), and the even split of coins across senders is checked after a reload, not assumed. The payment ceiling is read against the pile size before a higher offer is called a node or network limit.
+- Why that change stays: a restart that starts the processes but hands them spent or skewed coins still ends the load test, and a pile-bound ceiling must not be read as the network's.
+```
+
 The go files in this repo stay as they were at the start. A next repo copies this page and bakes the new lines into its own pastes.
